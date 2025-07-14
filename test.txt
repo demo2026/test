@@ -1,20 +1,47 @@
 @Bean
-public Step copyAdjustmentFileStep() {
-    return stepBuilderFactory.get("copyAdjustmentFileStep")
-            .tasklet(copyAdjustmentFileTasklet())
-            .build();
+public String adjustmentFilename() {
+    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMddyyyy_HHmmss"));
+    return filePrefix + timestamp + ".txt";
 }
 
-@Bean
-public Tasklet copyAdjustmentFileTasklet() {
-    return (contribution, chunkContext) -> {
-        // adjust the filename dynamically if needed
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMddyyyy_HHmmss"));
-        String filename = filePrefix + timestamp + ".txt";
-        Path source = Paths.get(processedDir, filename);
-        Path target = Paths.get(outboundDir, filename);
 
-        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+@Bean
+public FlatFileItemWriter<AdjustmentInfoRecord> adjustmentInfoWriter(String adjustmentFilename) {
+    String fullPath = Paths.get(processedDir, adjustmentFilename).toString();
+
+    FlatFileItemWriter<AdjustmentInfoRecord> writer = new FlatFileItemWriter<>();
+    writer.setResource(new FileSystemResource(fullPath));
+
+    AtomicInteger counter = new AtomicInteger(0);
+
+    writer.setLineAggregator((LineAggregator<AdjustmentInfoRecord>) item -> {
+        counter.incrementAndGet();
+        return String.join("|",
+            item.getRemitSeqNbr(),
+            item.getRemitClmSeqNbr(),
+            item.getAdjustCdSeqNbr(),
+            item.getRemitSegId(),
+            item.getRemitCd(),
+            item.getAdjustAmt(),
+            item.getAdjustQty());
+    });
+
+    writer.setHeaderCallback(w -> w.write("REMIT_SEQ_NBR|REMIT_CLM_SEQ_NBR|ADJUST_CD_SEQ_NBR|REMIT_SEQ_ID|REMIT_CD|ADJUST_AMT|ADJUST_QTY"));
+
+    return writer;
+}
+
+
+@Bean
+public Tasklet copyAdjustmentFileTasklet(String adjustmentFilename) {
+    return (contribution, chunkContext) -> {
+        Path sourcePath = Paths.get(processedDir, adjustmentFilename);
+        Path targetPath = Paths.get(outboundDir, adjustmentFilename);
+
+        log.debug("Copying file from {} to {}", sourcePath, targetPath);
+
+        Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+
         return RepeatStatus.FINISHED;
     };
 }
