@@ -1,0 +1,20 @@
+@Bean
+public Step copyAdjustmentFileStep() {
+    return stepBuilderFactory.get("copyAdjustmentFileStep")
+            .tasklet(copyAdjustmentFileTasklet())
+            .build();
+}
+
+@Bean
+public Tasklet copyAdjustmentFileTasklet() {
+    return (contribution, chunkContext) -> {
+        // adjust the filename dynamically if needed
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMddyyyy_HHmmss"));
+        String filename = filePrefix + timestamp + ".txt";
+        Path source = Paths.get(processedDir, filename);
+        Path target = Paths.get(outboundDir, filename);
+
+        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+        return RepeatStatus.FINISHED;
+    };
+}
