@@ -1,7 +1,11 @@
-Path path = Paths.get("./config/sql", aFileName);
-log.info("Trying to load SQL from: {}", path.toAbsolutePath());
+public static String loadSqlFileContents(String aFileName) throws IOException {
+    Path path = Paths.get("./config/sql", aFileName);
+    log.info("Trying to load SQL from: {}", path.toAbsolutePath());
 
-if (!Files.exists(path)) {
-    return null; // or throw exception
+    if (!Files.exists(path)) {
+        throw new FileNotFoundException("SQL file not found: " + path.toAbsolutePath());
+    }
+
+    byte[] bytes = Files.readAllBytes(path);
+    return new String(bytes, StandardCharsets.UTF_8);
 }
-return Files.readString(path, StandardCharsets.UTF_8);
