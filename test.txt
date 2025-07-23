@@ -1,11 +1,30 @@
+public class AppUtils {
 
-        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
-        SimpleDateFormat outputFormat = new SimpleDateFormat("dd-MMM-yy");
+    public static String formatToYYYYMMDD(Object dateObj) {
+        if (dateObj == null) {
+            return "";
+        }
 
-     
-            Date date = inputFormat.parse(inputDate);
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyyMMdd");
 
-     
-            String formattedDate = outputFormat.format(date);
-
-    
+            if (dateObj instanceof java.util.Date) {
+                return outputFormat.format((java.util.Date) dateObj);
+            } else if (dateObj instanceof String) {
+                String rawDate = (String) dateObj;
+                if (rawDate.isEmpty()) return "";
+                Date parsedDate = inputFormat.parse(rawDate);
+                return outputFormat.format(parsedDate);
+            } else if (dateObj instanceof java.sql.Timestamp) {
+                return outputFormat.format((java.sql.Timestamp) dateObj);
+            } else {
+                // unsupported type
+                return "";
+            }
+        } catch (Exception e) {
+            // optionally log the error
+            return "";
+        }
+    }
+}
