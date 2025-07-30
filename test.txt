@@ -1,15 +1,9 @@
- public static Map<String, String> parseKeyValueString(String input) {
-        Map<String, String> map = new HashMap<>();
-        if (input == null || input.isEmpty()) {
-            return map;
-        }
-
-        String[] pairs = input.split(",");
-        for (String pair : pairs) {
-            String[] kv = pair.split("=", 2);
-            if (kv.length == 2) {
-                map.put(kv[0].trim(), kv[1].trim());
-            }
-        }
-        return map;
-    }
+/**
+     * Parses a string of key-value pairs separated by ',' and '=' into a map.
+     * <p>
+     * Example input: "forgerock=123;digitial=456"
+     * Resulting map: {ab=123, cd=456}
+     *
+     * @param input the input string containing key-value pairs
+     * @return a map containing the parsed key-value pairs; empty map if input is null or empty
+     */
