@@ -1,30 +1,15 @@
-public class AppUtils {
-
-    public static String formatToYYYYMMDD(Object dateObj) {
-        if (dateObj == null) {
-            return "";
+ public static Map<String, String> parseKeyValueString(String input) {
+        Map<String, String> map = new HashMap<>();
+        if (input == null || input.isEmpty()) {
+            return map;
         }
 
-        try {
-            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyyMMdd");
-
-            if (dateObj instanceof java.util.Date) {
-                return outputFormat.format((java.util.Date) dateObj);
-            } else if (dateObj instanceof String) {
-                String rawDate = (String) dateObj;
-                if (rawDate.isEmpty()) return "";
-                Date parsedDate = inputFormat.parse(rawDate);
-                return outputFormat.format(parsedDate);
-            } else if (dateObj instanceof java.sql.Timestamp) {
-                return outputFormat.format((java.sql.Timestamp) dateObj);
-            } else {
-                // unsupported type
-                return "";
+        String[] pairs = input.split(",");
+        for (String pair : pairs) {
+            String[] kv = pair.split("=", 2);
+            if (kv.length == 2) {
+                map.put(kv[0].trim(), kv[1].trim());
             }
-        } catch (Exception e) {
-            // optionally log the error
-            return "";
         }
+        return map;
     }
-}
