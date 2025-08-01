@@ -1,29 +1,9 @@
-@Component
-public class EnvKeyValueStore {
-
-    @Value("${env:}") 
-    private String input;
-
-    private final Map<String, String> envMap = new HashMap<>();
-
-    @PostConstruct
-    public void init() {
-        if (input != null && !input.isEmpty()) {
-            String[] pairs = input.split(",");
-            for (String pair : pairs) {
-                String[] kv = pair.split("=", 2);
-                if (kv.length == 2) {
-                    envMap.put(kv[0].trim(), kv[1].trim());
-                }
-            }
-        }
-    }
-
-    public String getValue(String key) {
-        return envMap.get(key);
-    }
-
-    public Map<String, String> getAll() {
-        return Collections.unmodifiableMap(envMap);
-    }
+public CallbackService(String callbackPathBySystemIdMap) {
+    this.callbackPathMap = Arrays.stream(callbackPathBySystemIdMap.split(","))
+        .map(entry -> entry.split("=", 2))
+        .filter(kv -> kv.length == 2)
+        .collect(Collectors.toMap(
+            kv -> kv[0].trim().toLowerCase(),
+            kv -> kv[1].trim()
+        ));
 }
