@@ -1,9 +1,0 @@
-public CallbackService(String callbackPathBySystemIdMap) {
-    this.callbackPathMap = Arrays.stream(callbackPathBySystemIdMap.split(","))
-        .map(entry -> entry.split("=", 2))
-        .filter(kv -> kv.length == 2)
-        .collect(Collectors.toMap(
-            kv -> kv[0].trim().toLowerCase(),
-            kv -> kv[1].trim()
-        ));
-}
