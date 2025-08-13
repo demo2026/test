@@ -1,17 +1,17 @@
-Kafka consumer errors can and do occur, and it’s important to properly handle and log them to ensure reliable message processing. Common errors you may encounter include:
+@Bean
+public DefaultErrorHandler kafkaErrorHandler() {
+    DefaultErrorHandler errorHandler = new DefaultErrorHandler((record, ex) -> {
+        log.error("Kafka ErrorHandler caught exception for record: {}, Error: {}", record, ex.getMessage(), ex);
+     
+    });
 
-Offset out of range (when offsets are unavailable or lost)
+    return errorHandler;
+}
 
-Group coordinator not available
-
-Connection/network errors
-
-Serialization/deserialization errors
-
-Consumer lag
-
-Resource limits exceeded
-
-Kafka topic not found
-
-Application-specific or business logic errors
+@Bean
+public KafkaListenerContainerFactory<?> kafkaListenerContainerFactory() {
+    ConcurrentKafkaListenerContainerFactory<Object, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    factory.setConsumerFactory(consumerFactory());
+    factory.setCommonErrorHandler(kafkaErrorHandler());
+    return factory;
+}
