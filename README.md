@@ -1,17 +1,10 @@
-@Bean
-public DefaultErrorHandler kafkaErrorHandler() {
-    DefaultErrorHandler errorHandler = new DefaultErrorHandler((record, ex) -> {
-        log.error("Kafka ErrorHandler caught exception for record: {}, Error: {}", record, ex.getMessage(), ex);
-      
-    });
-  
-    return errorHandler;
-}
+If we are using AckMode.MANUAL, which means the offset commit happens later (synchronously at the next poll).
 
-@Bean
-public KafkaListenerContainerFactory<?> kafkaListenerContainerFactory() {
-    ConcurrentKafkaListenerContainerFactory<Object, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
-    factory.setConsumerFactory(consumerFactory());
-    factory.setCommonErrorHandler(kafkaErrorHandler());
-    return factory;
-}
+If we want the offset committed immediately when you call ack.acknowledge(), you need:
+
+factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+
+
+MANUAL_IMMEDIATE = commit right away
+
+MANUAL = commit when the poll loop goes back
