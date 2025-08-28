@@ -1,17 +1,9 @@
-@Bean
-public DefaultErrorHandler kafkaErrorHandler() {
-    DefaultErrorHandler errorHandler = new DefaultErrorHandler((record, ex) -> {
-        log.error("Kafka ErrorHandler caught exception for record: {}, Error: {}", record, ex.getMessage(), ex);
-       
-    });
-   
-    return errorHandler;
-}
+  HttpClient httpClient = HttpClient.create()
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000) // connection timeout
+            .doOnConnected(conn -> 
+                conn.addHandlerLast(new ReadTimeoutHandler(10, TimeUnit.SECONDS))  // read timeout
+                    .addHandlerLast(new WriteTimeoutHandler(10, TimeUnit.SECONDS)) // write timeout
+            );
 
-@Bean
-public KafkaListenerContainerFactory<?> kafkaListenerContainerFactory() {
-    ConcurrentKafkaListenerContainerFactory<Object, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
-    factory.setConsumerFactory(consumerFactory());
-    factory.setCommonErrorHandler(kafkaErrorHandler());
-    return factory;
-}
+
+.clientConnector(new ReactorClientHttpConnector(httpClient))
